@@ -20,6 +20,7 @@
 
 void builtin_cmd()
 {
+	//printf("entered builtin func with cmd:%s\n",cmd);
 	int j=2,i,space=0;
 
 	//managing bg process for built in cmds
@@ -317,11 +318,328 @@ void builtin_cmd()
 		else
 			clk();
 	}
+	
+	//setenv
+	else if(!strncmp(cmd,c8,6))
+	{
+		if(!strcmp(cmd,c8))
+			printf("No arguments given\n");
+		else
+		{
+			char *a1[10];
+			int i=0;
+			char*token=strtok(cmd," ,	");
+			while(token!=NULL)
+			{
+				a1[i]=token;
+				//printf("%s\n\n",a1[i]);
+				token=strtok(NULL," ,	");
+				i++;
+			}
+			//printf("%d\n",i);
+
+			if(i==1)
+				printf("No argumnets given\n");
+			else if(i==2)
+				setenv(a1[1],"",1);
+			else if(i==3)
+				setenv(a1[1],a1[2],1);
+			else
+				printf("More arguments given\n");
+
+		}
+	}
+
+	//unsetenv
+	else if(!strncmp(cmd,c9,8))
+	{
+		if(!strcmp(cmd,c9))
+			printf("No arguments given");
+		else
+		{
+			char *a1[10];
+			int i=0;
+			char*token=strtok(cmd," ,	");
+			while(token!=NULL)
+			{
+				a1[i]=token;
+				//printf("%s\n\n",a1[i]);
+				token=strtok(NULL," ,	");
+				i++;
+			}
+			//printf("%d\n",i);
+
+			if(i==1)
+				printf("No argumnets given\n");
+			else if(i==2)
+				if(getenv(a1[1])==NULL)
+					printf("variable does not exist\n");
+				else
+					if(unsetenv(a1[1])==-1)
+						perror("unset error");
+			else if (i>2)
+				printf("More arguments given\n");
+		}
+	}
+
+	//jobs
+	else if(!strcmp(cmd,c10))
+	{
+		int i=1;
+		while(i<=maxbg)
+		{
+			if(a[i].state==1)
+				printf("[%d]\t%s\t%s [%d]\n",a[i].jobid,a[i].status,a[i].command,a[i].pid);
+			i++;
+		}
+	}
+
+
+	//kjob
+	else if(!strncmp(cmd,c11,4))
+	{
+		char *a1[10];
+			int i=0;
+			char*token=strtok(cmd," ,	");
+			while(token!=NULL)
+			{
+				a1[i]=token;
+				//printf("%s\n\n",a1[i]);
+				token=strtok(NULL," ,	");
+				i++;
+			}
+			//printf("%d\n",i);
+
+			if(i==1)
+				printf("No argumnets given\n");
+			else if(i==2)
+				printf("Less arguments given\n");
+			else if(i==3)
+			{
+				int jid=atoi(a1[1]);//jobid
+				int sid=atoi(a1[2]);//signalid
+				
+				if(jid>maxbg)
+					printf("No such job found\n");
+				else if(jid<1)
+					printf("No such job found\n");
+				else
+				{
+					if(a[jid].state=1)
+					{
+						int procid=a[jid].pid;//process id of the given job
+						if(kill(procid,sid)==-1)
+							perror("ERROR");
+						else
+						{
+							a[jid].state=0;
+							//maxbg--;
+						}
+					}
+				}
+			}
+			else
+				printf("More arguments given\n");
+	}
+
+	//overkill
+	else if(!strcmp(cmd,c12))
+	{
+		int i;
+		for(i=1;i<=maxbg && a[i].state==1;i++)
+			if(kill(a[i].pid,9)==-1)
+				perror("ERROR");
+			else
+				a[i].state=0;
+		maxbg=0;
+
+	}
+
+	//quit
+	else if(!strcmp(cmd,c13))
+	{
+		exit(0);
+	}
+
+	//fg
+	else if(!strncmp(cmd,c14,2))
+	{
+
+		if(!strcmp(cmd,c14))
+		{
+			if(maxbg==0)
+			{
+				printf("fg: current: no such job\n");
+			}
+			else
+			{
+				if(kill(a[maxbg].pid,SIGCONT)==-1)
+					perror("ERROR:");
+				else
+				{
+					a[maxbg].state=0;
+					waitpid(a[maxbg].pid,NULL,WUNTRACED);
+					maxbg--;
+				}
+			}
+		}
+		else
+		{
+			char *a1[10];
+			int i=0;
+			char*token=strtok(cmd," ,	");
+			while(token!=NULL)
+			{
+				a1[i]=token;
+				//printf("%s\n\n",a1[i]);
+				token=strtok(NULL," ,	");
+				i++;
+			}
+			//printf("%d\n",i);
+
+			if(i==1)
+			{
+				if(kill(a[maxbg].pid,SIGCONT)==-1)
+					perror("ERROR:");
+				else
+				{
+					a[maxbg].state=0;
+					waitpid(a[maxbg].pid,NULL,WUNTRACED);
+					maxbg--;
+				}
+
+			}
+			else if(i==2)
+			{
+				if(atoi(a1[1])>maxbg)
+				{
+					printf("fg: %s: no such job\n",a1[1]);
+				}
+				for(int j=1;j<=maxbg;j++)
+				{
+					int x=atoi(a1[1]);//id stored in a1[1]
+					//printf("%d\n",x);
+					if(x==a[j].jobid)
+						if(kill(a[j].pid,SIGCONT)==-1)
+							perror("ERROR:");
+						else
+						{
+							a[j].state=0;
+							waitpid(a[j].pid,NULL,WUNTRACED);
+							//maxbg--;
+						}
+				}
+
+			}
+			else if (i>2)
+				printf("More arguments given\n");
+		}
+
+	}
+
+	//bg
+	else if(!strncmp(cmd,c15,2))
+	{
+
+		if(!strcmp(cmd,c15))
+		{
+			int i;
+			for(i=maxbg;i>=1;i--)
+			{
+				if(!strcmp(a[i].status,"Stopped"))
+				{
+					if(kill(a[i].pid,SIGCONT)==-1)
+						perror("ERROR");
+					else
+					{
+						strcpy(a[i].status,"Running");
+						break;
+					}
+				}
+			}
+			if(i==0)
+				printf("bg: current: no such job\n");
+		}
+		else
+		{
+			char *a1[10];
+			int i=0;
+			char*token=strtok(cmd," ,	");
+			while(token!=NULL)
+			{
+				a1[i]=token;
+				//printf("%s\n\n",a1[i]);
+				token=strtok(NULL," ,	");
+				i++;
+			}
+			//printf("%d\n",i);
+
+			if(i==1)
+			{
+				int i;
+				for(i=maxbg;i>=1;i--)
+				{
+					if(!strcmp(a[i].status,"Stopped"))
+					{
+						if(kill(a[i].pid,SIGCONT)==-1)
+							perror("ERROR");
+						else
+						{
+							strcpy(a[i].status,"Running");
+							break;
+						}
+					}
+				}	
+				if(i==0)
+					printf("bg: current: no such job\n");
+			}
+			else if(i==2)
+			{
+				int j;
+				for(j=1;j<=maxbg;j++)
+				{
+					int x=atoi(a1[1]);//id stored in a1[1]
+					//printf("%d\n",x);
+					if(x==a[j].jobid)
+						if(kill(a[j].pid,SIGCONT)==-1)
+							perror("ERROR:");
+						else
+						{
+							strcpy(a[j].status,"Running");
+							break;
+						}
+				}
+				if(j==maxbg+1)
+					printf("bg: %s: no such job\n",a1[1]);
+			}
+			else if (i>2)
+				printf("More arguments given\n");
+		}
+
+
+	}
+
 
 	//error handling for other inputs
 	else
 	{
 		printf("%s: command not found\n",cmd);
 
+	}
+
+	if(in1==1)
+	{
+		close(in1i);
+		dup2(pipein,0);
+	}
+	if(out1==1)
+	{
+		close(out1i);
+		dup2(pipeout,1);
+	}
+	if(out2==1)
+	{
+		close(out2i);
+		dup2(pipeout,1);
 	}
 }

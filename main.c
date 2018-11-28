@@ -6,6 +6,8 @@ int main()
 	homeflag=1;
 	maxbg=0;
 	remindflag=0;
+	pipein=dup(0);
+	pipeout=dup(1);
 
 	//built in commands
 	strcpy(c1,"pwd");
@@ -15,6 +17,15 @@ int main()
 	strcpy(c5,"pinfo");
 	strcpy(c6,"remindme");
 	strcpy(c7,"clock");
+	strcpy(c8,"setenv");
+	strcpy(c9,"unsetenv");
+	strcpy(c10,"jobs");
+	strcpy(c11,"kjob");
+	strcpy(c12,"overkill");
+	strcpy(c13,"quit");
+	strcpy(c14,"fg");
+	strcpy(c15,"bg");
+
 
 	int i,j,flag,pointer;
 
@@ -28,8 +39,30 @@ int main()
 		remindmsg[0]='\0';//for reminder msg
 		j=0;
 		cmdc=0;
+		pipecheck=0;
+		pipedes=0;
+		intermediatepipe=0;
+		//pid=0;/////////////////////////
+		builtinredirecterror=0;
+		
+		
+		in1=0;
+		out1=0;
+		out2=0;
+		in1i=0;
+		out1i=0;
+		out2i=0;
+		doubleredirect=0;
 
 		char a='z';
+		
+		//ctrl+c
+		signal(SIGINT,sigintHandler);
+		//ctrl+z
+		signal(SIGTSTP,sigstpHandler);
+		//ctrl+'\'
+		signal(SIGQUIT,sigqHandler);
+
 		prompt();
 
 		//get input
@@ -71,6 +104,20 @@ int main()
 			flag=0;
 			pointer=0;
 			j=0;
+			pipecheck=0;
+			pipedes=0;
+			intermediatepipe=0;
+			//pid=0;/////////////////////////
+			builtinredirecterror=0;
+			
+			in1=0;
+			out1=0;
+			out2=0;
+			in1i=0;
+			out1i=0;
+			out2i=0;
+			doubleredirect=0;
+
 
 			strcpy(cmd,cmdstorage[cmdc]);//for uniformity
 
@@ -94,33 +141,10 @@ int main()
 			for(i=j-1;cmd[i]==9 || cmd[i]==32;i--);
 			cmd[i+1]='\0';
 
-			//check for built in cmds
-			if(!strncmp(cmd,c1,3) || !strncmp(cmd,c2,4) || !strncmp(cmd,c3,2) || !strncmp(cmd,c4,2) || !strncmp(cmd,c5,5) || !strncmp(cmd,c7,5))
-				builtin_cmd();
-
-			//remindme
-			else if(!strncmp(cmd,c6,8))
-			{
-				int ll;
-				//managing bg process if &
-				if(cmd[strlen(cmd)-1]=='&')
-					cmd[strlen(cmd)-1]='\0';
-				for(ll=strlen(cmd)-1;cmd[ll]==9 || cmd[ll]==32;ll--);
-				cmd[ll+1]='\0';
-
-				if(!strcmp(cmd,c6))
-					printf("no arguments given\n");
-				else
-					reminder();
-			}
-
-			//not built in cmds
-			else
-			{
-				process_cmd();
-				execute();
-				free(buf);
-			}
+			//if(!builtin_check())
+			//{
+				pipefunc();
+			//}
 			cmdc--;
 		}
 

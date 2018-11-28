@@ -83,7 +83,7 @@ void clk()
 					int loopcount=(n/t)+1;
 					
 					while(loopcount!=0)
-					{
+					{	
 						//open files
 						FILE*f=fopen("/sys/class/rtc/rtc0/date","r");
 						FILE*g=fopen("/sys/class/rtc/rtc0/time","r");

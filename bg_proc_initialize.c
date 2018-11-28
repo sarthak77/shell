@@ -24,6 +24,8 @@ void bg_proc_initialize(int pid,char*string)
 	maxbg++;
 	a[maxbg].pid=pid;
 	a[maxbg].jobid=maxbg;
+	a[maxbg].state=1;
+	strcpy(a[maxbg].status,"Running");
 	if(!remindflag)
 	{
 		strcpy(a[maxbg].command,string);

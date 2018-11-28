@@ -1,4 +1,4 @@
-cshell : bgprocexecute.o bg_proc_initialize.o builtin_cmd.o clk.o execute.o ls_la.o main.o print_perms.o process_cmd.o prompt.o reminder.o
+cshell : bgprocexecute.o bg_proc_initialize.o builtin_cmd.o clk.o execute.o ls_la.o main.o print_perms.o process_cmd.o prompt.o reminder.o pipe.o redirectioncheck.o builtin_check.o processbuilt_cmd.o sighand.o
 	gcc $^ -o cshell
 
 bgprocexecute.o : bgprocexecute.c
@@ -34,5 +34,20 @@ prompt.o : prompt.c
 reminder.o : reminder.c
 	gcc -c reminder.c
 
+pipe.o : pipe.c
+	gcc -c pipe.c
+
+redirectioncheck.o : redirectioncheck.c
+	gcc -c redirectioncheck.c
+
+builtin_check.o : builtin_check.c
+	gcc -c builtin_check.c
+
+processbuilt_cmd.o : processbuilt_cmd.c
+	gcc -c processbuilt_cmd.c
+
+sighand.0 : sighand.c
+	gcc -c sighand.c
+
 clean : 
-	rm -f bgprocexecute.o bg_proc_initialize.o builtin_cmd.o clk.o execute.o ls_la.o main.o print_perms.o process_cmd.o prompt.o reminder.o cshell
+	rm -f bgprocexecute.o bg_proc_initialize.o builtin_cmd.o clk.o execute.o ls_la.o main.o print_perms.o process_cmd.o prompt.o pipe.o reminder.o redirectioncheck.o builtin_check.o processbuilt_cmd.o sighand.o cshell

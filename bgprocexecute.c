@@ -34,7 +34,10 @@ void bgprocexecute()
 			{
 				//will be printed only if another not built in command executed
 				if(a[i].pid==wpid && a[i].flag==0)
+				{
+					a[i].state=0;
 					printf("[%d]+	Done\t\t\t%s with pid %d\n",a[i].jobid,a[i].command, wpid);
+				}
 				if(a[i].pid==wpid && a[i].flag==1)
 					printf("REMINDER: %s\n",a[i].command);
 			}

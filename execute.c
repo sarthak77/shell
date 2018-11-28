@@ -21,7 +21,7 @@
 void execute()
 {
 	int status;
-	pid_t pid,wpid;//datatype
+	pid_t wpid;//datatype
 
 	pid=fork();
 
@@ -32,9 +32,26 @@ void execute()
 	//child process
 	else if (pid==0)
 	{
-		if(execvp(buf[0],buf)==-1)//-1 if failed
-			printf("%s: command not found\n",buf[0]);
-	}
+		redirectioncheck();
+
+		if(in1i!=-1)
+		{
+
+			//printf("executing cmd\n");
+			if(execvp(buf[0],buf)==-1)//-1 if failed
+				printf("%s: command not found\n",buf[0]);
+
+			//dup2(pipeout,1);
+			//dup2(pipein,0);
+		}
+		if(in1==1)
+			close(in1i);
+		if(out1==1)
+			close(out1i);
+		if(out2==1)
+			close(out2i);
+		
+		}
 
 	//parent process
 	else
@@ -49,7 +66,8 @@ void execute()
 		//foreground process
 		else//do while bacause we need it to run atleast once
 		{
-			do
+			waitpid(pid,&status,WUNTRACED);
+			/*do
 			{
 				wpid = waitpid(pid, &status, WUNTRACED);
 				//wuntraced to return if a child has stopped
@@ -59,6 +77,8 @@ void execute()
 			//waits for child to end
 			//WIFEXITED returns true if the child terminated normally
 			//WIFSIGNALED returns true if the child process was terminated by a signal.
+			*/
+			
 		}
 		bgprocexecute();
 	}

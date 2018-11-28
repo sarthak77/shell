@@ -18,26 +18,20 @@
 #include<sys/utsname.h>
 #include "declarations.h"
 
-//modifying cmd to give it to execvp
-void process_cmd()
-{	
-	//check if bg
-	if(cmd[strlen(cmd)-1]=='&')
-	{
-		bg=1;
-		cmd[strlen(cmd)-1]='\0';//remove &
-	}
-	else
-		bg=0;
-	//printf("bg:%d\n",bg);
 
-	buf=malloc(100*sizeof(char*));
-	int i=0;
-	char*token=strtok(cmd," ,	");
-	while((token!=NULL) && (bg==0 || (bg==1 && strcmp(token,"&"))))//to not store &
-	{
+void processbuilt_cmd()
+{
+    char temp[1000];
+    strcpy(temp,cmd);
+    char*token2=strtok(cmd,">,<,>>");
+    strcpy(cmd,token2);
+    //free(cmd);
+	char*token=strtok(temp," ,	");
+    
 
-		if(in1==1 || out1==1 || out2==1)
+    while(token!=NULL)
+    {
+        if(in1==1 || out1==1 || out2==1)
 		{
 			if(doubleredirect==0)
 			{
@@ -45,7 +39,6 @@ void process_cmd()
 				doubleredirect=1;
 				token=strtok(NULL," ,	");
 			}
-			//break;
 		}
 
 		if(token!=NULL)
@@ -62,21 +55,11 @@ void process_cmd()
 			{
 				out2=1;
 			}
-			else
-				buf[i++]=token;
+			////both redirections
+	        if((in1 && out1) || (in1 && out2))
+		        strcpy(redirectfile2,token);
 			
-			token=strtok(NULL," ,	");
+            token=strtok(NULL," ,	");
 		}
-	}
-
-	//both redirections
-	if((in1 && out1) || (in1 && out2))
-	{
-		strcpy(redirectfile2,buf[1]);
-		buf[1]=NULL;	
-	}
-
-	buf[i]=NULL;
-	//for(int j=0;buf[j]!=NULL;j++)
-	//	printf("%s\n",buf[j]);
+    }
 }
